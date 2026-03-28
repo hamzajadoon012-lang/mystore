@@ -1,0 +1,4 @@
+﻿User-agent: *
+Allow: /
+Sitemap: https://trendspk.store/sitemap.xml
+Disallow: /private/
