@@ -241,6 +241,7 @@ const $$ = (sel, ctx = document) => [...ctx.querySelectorAll(sel)];
   const modal     = $('#modal');
   const closeBtn  = $('#modalClose');
   const modalImg  = $('#modalImg');
+  const modalGallery = $('#modalGallery');
   const modalBadge= $('#modalBadge');
   const modalCat  = $('#modalCat');
   const modalTitle= $('#modalTitle');
@@ -269,10 +270,24 @@ const $$ = (sel, ctx = document) => [...ctx.querySelectorAll(sel)];
     const d = card.dataset;
 
     // Populate
-    modalImg.src = d.img || '';
-    modalImg.alt = d.title || '';
-    modalImg.style.opacity = '0';
-    modalImg.onload = () => { modalImg.style.opacity = '1'; modalImg.style.transition = 'opacity .4s'; };
+    const gallery = (() => {
+      try { return JSON.parse(d.gallery || '[]'); } catch (e) { return []; }
+    })();
+    if (modalGallery && Array.isArray(gallery) && gallery.length) {
+      modalGallery.innerHTML = gallery.map((src, i) =>
+        `<img src="${src}" alt="${d.title || 'Product image'} ${i + 1}" loading="lazy" />`
+      ).join('');
+      modalImg.style.display = 'none';
+      modalGallery.parentElement?.classList.add('gallery');
+    } else {
+      if (modalGallery) modalGallery.innerHTML = '';
+      modalImg.style.display = '';
+      modalGallery?.parentElement?.classList.remove('gallery');
+      modalImg.src = d.img || '';
+      modalImg.alt = d.title || '';
+      modalImg.style.opacity = '0';
+      modalImg.onload = () => { modalImg.style.opacity = '1'; modalImg.style.transition = 'opacity .4s'; };
+    }
 
     const badgeText = d.badge || '';
     if (modalBadge) {
@@ -315,6 +330,11 @@ const $$ = (sel, ctx = document) => [...ctx.querySelectorAll(sel)];
       } catch (err) {
         modalBullets.innerHTML = '';
       }
+    }
+
+    if (modalCTA && d.link) {
+      modalCTA.href = d.link;
+      if (d.title) modalCTA.setAttribute('aria-label', `Buy ${d.title} on Daraz`);
     }
 
     // Show overlay
